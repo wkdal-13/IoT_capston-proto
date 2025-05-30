@@ -1,0 +1,38 @@
+<!-- templates/login.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>로그인</title>
+    <!-- TailwindCSS 등을 CDN 또는 로컬 빌드로 연결 -->
+    <script src="https://cdn.tailwindcss.com"></script></head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="bg-white p-8 rounded shadow-md w-full max-w-sm">
+        <h1 class="text-2xl font-bold mb-4">로그인</h1>
+        
+        <!-- 에러 메시지 표시 -->
+        {% if error %}
+        <div class="text-red-500 mb-4">
+            {{ error }}
+        </div>
+        {% endif %}
+        
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="mb-4">
+                <label for="username" class="block font-semibold mb-1">아이디</label>
+                <input type="text" name="username" id="username"
+                       class="w-full border border-gray-300 p-2 rounded" />
+            </div>
+            <div class="mb-4">
+                <label for="password" class="block font-semibold mb-1">비밀번호</label>
+                <input type="password" name="password" id="password"
+                       class="w-full border border-gray-300 p-2 rounded" />
+            </div>
+            <button type="submit"
+                    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                로그인
+            </button>
+        </form>
+    </div>
+</body>
+</html>
