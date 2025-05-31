@@ -28,7 +28,6 @@ except Exception as e:
     print(f"❌ 모델 로드 실패: {e}")
     MODEL = None
 
-
 def fetch_system_info():
     cpu = psutil.cpu_percent(percpu=True)
     mem = psutil.virtual_memory()
@@ -53,7 +52,6 @@ def fetch_system_info():
         'temperature': temp
     }
 
-
 @app.route('/')
 def index():
     if not session.get('logged_in'):
@@ -62,7 +60,6 @@ def index():
     return render_template('index.html',
                            system_info=info,
                            active_tab='dashboard')
-
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -75,12 +72,10 @@ def login():
         return render_template('login.html', error='아이디 또는 비밀번호가 잘못되었습니다.')
     return render_template('login.html')
 
-
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)
     return redirect(url_for('login'))
-
 
 @app.route('/inspect', methods=['POST'])
 def inspect():
@@ -104,7 +99,6 @@ def inspect():
                            system_info=info,
                            inspect_result=result,
                            active_tab='inspect')
-
 
 @app.route('/detect', methods=['POST'])
 def detect():
@@ -143,13 +137,50 @@ def detect():
                            detect_table=table_html,
                            active_tab='detect')
 
-
 @app.route('/system_info')
 def system_info():
-    if not session.get('logged_in'):
-        return jsonify({'error': '로그인이 필요합니다.'}), 401
-    return jsonify(fetch_system_info())
+    if 'logged_in' in session and session['logged_in'] is True:
+        # 기존 시스템 정보
+        cpu_usage = psutil.cpu_percent(interval=0.5)
+        mem_info = psutil.virtual_memory()
+        disk_info = psutil.disk_usage('/')
+        net_info = psutil.net_io_counters()
 
+        cpu_temp = 0
+        # 온도 정보 추가
+        try:
+            cpu_temp = float(os.popen("vcgencmd measure_temp").readline().replace("temp=", "").replace("'C", "").strip())
+        except:
+            pass
+        # 데이터 구성
+        data = {
+            'cpu': {
+                'per_core_percent': psutil.cpu_percent(interval=0.5, percpu=True),
+            },
+            'memory': {
+                'used': mem_info.used,
+                'available': mem_info.available,
+            },
+            'disk': {
+                'used': disk_info.used,
+                'total': disk_info.total,
+            },
+            'network': {
+                'bytes_sent': net_info.bytes_sent,
+                'bytes_received': net_info.bytes_recv,
+            },
+            'security': {
+                'active_connections': len(psutil.net_connections(kind='inet')),
+                'failed_login_attempts': 3,  # 예시 데이터
+                'active_admin_accounts': 1,  # 예시 데이터
+            },
+            'hardware': {
+                'cpu_temperature': cpu_temp
+            },
+        }
+        return jsonify(data)
+    else:
+        return jsonify({'error': '로그인이 필요합니다.'}), 401
 
 @app.route('/anomaly_stats')
 def anomaly_stats():
@@ -173,6 +204,6 @@ def anomaly_stats():
         'ratio': grouped['ratio'].tolist()
     })
 
-
 if __name__ == '__main__':
+    # 0.0.0.0:5000에서 Flask 앱 실행
     app.run(host='0.0.0.0', port=5000)
