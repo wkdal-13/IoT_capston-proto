@@ -1,4 +1,5 @@
 # IoT_capston-proto
+This project is a "Raspberry Pi-based AP Security Inspection and Abnormal Behavior Detection Tool" program written by students of the Department of Digital Security at Cheongju University to submit to Capstone Design.
 
 ## Install & Run
 
