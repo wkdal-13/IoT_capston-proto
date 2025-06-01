@@ -18,11 +18,13 @@
 
   <!-- 상단 네비게이션 바 -->
   <nav class="bg-white shadow-md p-4 flex justify-between items-center">
-    <img
-      src="{{ url_for('static', filename='img/raspberry-pi-logo.png') }}"
-      alt="로고"
-      class="h-8 w-auto"
-    />
+    <div class="flex items-center space-x-4">
+        <img 
+            src="{{ url_for('static', filename='img/raspberry-pi-logo.png') }}" 
+            alt="Raspberry Pi Logo" 
+            class="h-8 w-auto"
+        />
+    </div>
     <a href="{{ url_for('logout') }}"
        class="text-white bg-red-500 px-4 py-2 rounded hover:bg-red-600">
       로그아웃
@@ -50,45 +52,55 @@
   <!-- 콘텐츠: 대시보드 -->
   <div id="content-dashboard" class="p-8">
     <h1 class="text-3xl font-bold mb-6 text-gray-800">시스템 상태</h1>
+  
+    <!-- 대시보드 그리드 -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div class="bg-white shadow-lg rounded-lg p-6">
-        <h2 class="text-lg font-bold mb-4">CPU 사용률</h2>
-        <canvas id="cpuChart" style="max-height:150px;"></canvas>
-        <p id="cpu-summary" class="mt-4 text-sm text-gray-600">
-          코어 사용률 요약: 0%
-        </p>
-      </div>
-      <div class="bg-white shadow-lg rounded-lg p-6">
-        <h2 class="text-lg font-bold mb-4">메모리 사용량</h2>
-        <canvas id="memoryChart" style="max-height:150px;"></canvas>
-        <p id="memory-summary" class="mt-4 text-sm text-gray-600">
-          사용 중: 0GB, 사용 가능: 0GB
-        </p>
-      </div>
-      <div class="bg-white shadow-lg rounded-lg p-6">
-        <h2 class="text-lg font-bold mb-4">디스크 사용량</h2>
-        <canvas id="diskChart" style="max-height:150px;"></canvas>
-        <p id="disk-summary" class="mt-4 text-sm text-gray-600">
-          사용 중: 0GB, 사용 가능: 0GB
-        </p>
-      </div>
-    </div>
-    <div class="grid grid-cols-10 gap-6 mt-6">
-      <div class="col-span-6 bg-white shadow-lg rounded-lg p-6">
-        <h2 class="text-lg font-bold mb-4">네트워크 상태</h2>
-        <canvas id="networkChart" style="max-height:200px;"></canvas>
-        <p id="network-summary" class="mt-4 text-sm text-gray-600">
-          송신 속도: 0MB/s, 수신 속도: 0MB/s
-        </p>
-      </div>
-      <div class="col-span-4 bg-white shadow-lg rounded-lg p-6 flex items-center justify-center">
-        <div>
-          <h2 class="text-lg font-bold mb-4 text-center">CPU 온도</h2>
-          <p id="cpu-temperature" class="text-5xl font-bold text-red-500 text-center">
-            0°C
-          </p>
+        <!-- CPU 사용률 (라인 그래프) -->
+        <div class="bg-white shadow-lg rounded-lg p-6">
+            <h2 class="text-lg font-bold mb-4">CPU 사용률</h2>
+            <canvas id="cpuChart" style="max-height: 150px;"></canvas>
+            <div class="mt-4">
+                <p id="cpu-summary" class="text-sm text-gray-600">코어 사용률 요약: 0%</p>
+            </div>
         </div>
-      </div>
+
+        <!-- 메모리 사용량 (파이 차트) -->
+        <div class="bg-white shadow-lg rounded-lg p-6">
+            <h2 class="text-lg font-bold mb-4">메모리 사용량</h2>
+            <canvas id="memoryChart" style="max-height: 150px;"></canvas>
+            <div class="mt-4">
+                <p id="memory-summary" class="text-sm text-gray-600">사용 중: 0GB, 사용 가능: 0GB</p>
+           </div>
+        </div>
+
+        <!-- 디스크 사용량 (파이 차트) -->
+        <div class="bg-white shadow-lg rounded-lg p-6">
+            <h2 class="text-lg font-bold mb-4">디스크 사용량</h2>
+            <canvas id="diskChart" style="max-height: 150px;"></canvas>
+            <div class="mt-4">
+                <p id="disk-summary" class="text-sm text-gray-600">사용 중: 0GB, 사용 가능: 0GB</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 네트워크 상태와 온도 -->
+    <div class="grid grid-cols-10 gap-6 mt-6">
+        <!-- 네트워크 상태 (7:3) -->
+        <div class="col-span-6 bg-white shadow-lg rounded-lg p-6">
+            <h2 class="text-lg font-bold mb-4">네트워크 상태</h2>
+            <canvas id="networkChart" style="max-height: 200px;"></canvas>
+            <div class="mt-4">
+                <p id="network-summary" class="text-sm text-gray-600">송신 속도: 0MB/s, 수신 속도: 0MB/s</p>
+            </div>
+        </div>
+      
+        <!-- 온도 상태 (7:3) -->
+        <div class="col-span-4 bg-white shadow-lg rounded-lg p-6 flex items-center justify-center">
+            <div>
+                <h2 class="text-lg font-bold mb-4 text-center">CPU 온도</h2>
+                <p id="cpu-temperature" class="text-5xl font-bold text-red-500 text-center">0°C</p>
+            </div>
+        </div>
     </div>
   </div>
 
@@ -220,85 +232,159 @@
     });
   </script>
 
-  <!-- 시스템 정보 차트 & 자동 갱신 -->
   <script>
-    // 차트 초기화
-    const cpuChart = new Chart(document.getElementById('cpuChart'), {
-      type: 'line',
-      data: { labels: Array.from({length:10},(_,i)=>`T-${10-i}`), datasets: [] },
-      options: { responsive: true, scales: { y: { beginAtZero:true, max:100 } } }
-    });
-    const memoryChart = new Chart(document.getElementById('memoryChart'), {
-      type: 'doughnut',
-      data: { labels:['사용 중','사용 가능'], datasets:[{ data:[0,100] }] },
-      options: { responsive: true }
-    });
-    const diskChart = new Chart(document.getElementById('diskChart'), {
-      type: 'doughnut',
-      data: { labels:['사용 중','사용 가능'], datasets:[{ data:[0,100] }] },
-      options: { responsive: true }
-    });
-    const networkChart = new Chart(document.getElementById('networkChart'), {
+  // 차트 설정
+  const cpuChart = new Chart(document.getElementById('cpuChart'), {
       type: 'line',
       data: {
-        labels: Array.from({length:10},(_,i)=>`T-${10-i}`),
-        datasets:[
-          { label:'송신', data:[], fill:false },
-          { label:'수신', data:[], fill:false }
-        ]
+          labels: Array.from({ length: 10 }, (_, i) => `T-${10 - i}`),
+          datasets: []
       },
-      options:{ responsive:true, scales:{ y:{ beginAtZero:true } } }
-    });
-
-    function updateTemperatureColor(temp) {
-      const el = document.getElementById('cpu-temperature');
-      if (temp >= 70) el.classList.replace('text-red-500','text-yellow-500');
-      else el.classList.replace('text-yellow-500','text-red-500');
-    }
-
-    function fetchSystemInfo() {
-      fetch('/system_info')
-        .then(res=>res.json())
-        .then(data=>{
-          // CPU
-          cpuChart.data.datasets.push({ label:'CPU', data:data.cpu });
-          if(cpuChart.data.datasets.length>10) cpuChart.data.datasets.shift();
-          cpuChart.update();
-          document.getElementById('cpu-summary').textContent =
-            `코어 사용률 요약: ${data.cpu.join('% / ')}%`;
-          // Memory
-          const mu = data.memory_used/(1024**3), ma = data.memory_available/(1024**3);
-          memoryChart.data.datasets[0].data = [mu, ma];
-          memoryChart.update();
-          document.getElementById('memory-summary').textContent =
-            `사용 중: ${mu.toFixed(2)}GB, 사용 가능: ${ma.toFixed(2)}GB`;
-          // Disk
-          const du = data.disk_used/(1024**3), da = data.disk_available/(1024**3);
-          diskChart.data.datasets[0].data = [du, da];
-          diskChart.update();
-          document.getElementById('disk-summary').textContent =
-            `사용 중: ${du.toFixed(2)}GB, 사용 가능: ${da.toFixed(2)}GB`;
-          // Network
-          const sent = (data.network.bytes_sent/(1024**2)).toFixed(2);
-          const recv = (data.network.bytes_recv/(1024**2)).toFixed(2);
-          networkChart.data.datasets[0].data.push(sent);
-          networkChart.data.datasets[1].data.push(recv);
-          if(networkChart.data.datasets[0].data.length>10){
-            networkChart.data.datasets[0].data.shift();
-            networkChart.data.datasets[1].data.shift();
+      options: {
+          responsive: true,
+          plugins: {
+              legend: { display: true, position: 'top' }
+          },
+          scales: {
+              y: { beginAtZero: true, max: 100 }
           }
-          networkChart.update();
-          document.getElementById('network-summary').textContent =
-            `송신 속도: ${sent}MB/s, 수신 속도: ${recv}MB/s`;
-          // Temp
-          const temp = data.temperature||0;
-          document.getElementById('cpu-temperature').textContent = `${temp}°C`;
-          updateTemperatureColor(temp);
-        })
-        .catch(console.error);
-    }
-    setInterval(fetchSystemInfo, 3000);
-    fetchSystemInfo();
+      }
+  });
+
+  const memoryChart = new Chart(document.getElementById('memoryChart'), {
+      type: 'pie',
+      data: {
+          labels: ['사용 중', '사용 가능'],
+          datasets: [{
+              data: [0, 100],
+              backgroundColor: ['#4CAF50', '#E0E0E0']
+          }]
+      },
+      options: {
+          responsive: true,
+          plugins: {
+              legend: { display: true, position: 'top' }
+          }
+      }
+  });
+
+  const diskChart = new Chart(document.getElementById('diskChart'), {
+      type: 'pie',
+      data: {
+          labels: ['사용 중', '사용 가능'],
+          datasets: [{
+              data: [0, 100],
+              backgroundColor: ['#2196F3', '#E0E0E0']
+          }]
+      },
+      options: {
+          responsive: true,
+          plugins: {
+              legend: { display: true, position: 'top' }
+          }
+      }
+  });
+
+  const networkChart = new Chart(document.getElementById('networkChart'), {
+      type: 'line',
+      data: {
+          labels: Array.from({ length: 10 }, (_, i) => `T-${10 - i}`),
+          datasets: [
+              {
+                  label: '송신 속도 (MB/s)',
+                  data: Array(10).fill(0),
+                  fill: false,
+                  borderColor: '#4CAF50'
+              },
+              {
+                  label: '수신 속도 (MB/s)',
+                  data: Array(10).fill(0),
+                  fill: false,
+                  borderColor: '#2196F3'
+              }
+          ]
+      },
+      options: {
+          responsive: true,
+          plugins: {
+              legend: { display: true, position: 'top' }
+          },
+          scales: {
+              y: { beginAtZero: true }
+          }
+      }
+  });
+  function updateTemperatureColor(temp) {
+      const tempElement = document.getElementById('cpu-temperature');
+      if (temp < 40) {
+          tempElement.className = 'text-7xl font-bold text-green-500 text-center';
+      } else if (temp < 70) {
+          tempElement.className = 'text-7xl font-bold text-yellow-500 text-center';
+      } else {
+          tempElement.className = 'text-7xl font-bold text-red-500 text-center';
+      }
+  }
+  // 데이터 갱신
+  function fetchSystemInfo() {
+      fetch('/system_info')
+          .then(response => response.json())
+          .then(data => {
+              // CPU 데이터 갱신
+              if (!cpuChart.data.datasets.length) {
+                  data.cpu.per_core_percent.forEach((_, i) => {
+                      cpuChart.data.datasets.push({
+                          label: `Core ${i}`,
+                          data: Array(10).fill(0),
+                          fill: false,
+                          borderColor: `hsl(${(i * 60) % 360}, 70%, 50%)`
+                      });
+                  });
+              }
+              data.cpu.per_core_percent.forEach((usage, i) => {
+                  cpuChart.data.datasets[i].data.push(usage);
+                  if (cpuChart.data.datasets[i].data.length > 10) {
+                      cpuChart.data.datasets[i].data.shift();
+                  }
+              });
+              cpuChart.update();
+              const avgCpuUsage = (data.cpu.per_core_percent.reduce((a, b) => a + b, 0) / data.cpu.per_core_percent.length).toFixed(2);
+              document.getElementById('cpu-summary').textContent = `코어 사용률 요약: ${avgCpuUsage}%`;
+
+              // 메모리 데이터 갱신
+              memoryChart.data.datasets[0].data = [
+                  data.memory.used / (1024 ** 3), 
+                  data.memory.available / (1024 ** 3)
+              ];
+              memoryChart.update();
+              document.getElementById('memory-summary').textContent = `사용 중: ${(data.memory.used / (1024 ** 3)).toFixed(2)}GB, 사용 가능: ${(data.memory.available / (1024 ** 3)).toFixed(2)}GB`;
+
+              // 디스크 데이터 갱신
+              diskChart.data.datasets[0].data = [
+                  data.disk.used / (1024 ** 3), 
+                  (data.disk.total - data.disk.used) / (1024 ** 3)
+              ];
+              diskChart.update();
+              document.getElementById('disk-summary').textContent = `사용 중: ${(data.disk.used / (1024 ** 3)).toFixed(2)}GB, 사용 가능: ${((data.disk.total - data.disk.used) / (1024 ** 3)).toFixed(2)}GB`;
+
+              // 네트워크 데이터 갱신
+              networkChart.data.datasets[0].data.push(data.network.bytes_sent / (1024 ** 2));
+              networkChart.data.datasets[1].data.push(data.network.bytes_received / (1024 ** 2));
+              if (networkChart.data.datasets[0].data.length > 10) {
+                  networkChart.data.datasets[0].data.shift();
+                  networkChart.data.datasets[1].data.shift();
+              }
+              networkChart.update();
+              document.getElementById('network-summary').textContent = `송신 속도: ${(data.network.bytes_sent / (1024 ** 2)).toFixed(2)}MB/s, 수신 속도: ${(data.network.bytes_received / (1024 ** 2)).toFixed(2)}MB/s`;
+
+              // CPU 온도 갱신
+              const cpuTemp = data.hardware.cpu_temperature || 0;
+              document.getElementById('cpu-temperature').textContent = `${data.hardware.cpu_temperature}°C`;
+              updateTemperatureColor(cpuTemp);
+          });
+  }
+
+  setInterval(fetchSystemInfo, 3000);
+  fetchSystemInfo();
   </script>
 
   <!-- 이상 이벤트 차트 -->
