@@ -5,7 +5,7 @@
 - 기본 웹 라우트 유지하면서 SocketIO 서버 실행
 
 ### 전체 코드(변경/추가된 부분 주석 처리함)
-...
+```
 import os
 import psutil
 import joblib
@@ -280,4 +280,4 @@ if __name__ == '__main__':
     start_background_thread()
     # Flask 대신 SocketIO 앱 실행
     socketio.run(app, host='0.0.0.0', port=5000)
-...
+```
