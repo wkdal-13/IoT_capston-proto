@@ -1,6 +1,7 @@
 ### 수정된 app.py
 추가할 부분 추가하여 다시 재작성함
 
+```
 import os
 import psutil
 import joblib
@@ -233,4 +234,4 @@ if __name__ == '__main__':
 
     # Flask 앱 실행
     app.run(host='0.0.0.0', port=5000)
-
+```
