@@ -18,5 +18,5 @@ python3 app.py
 If the current index.html file does not work properly, copy and use the contents of the index(tailwind 웹에서 받기).html file in the templates directory.
 
 ```
-made by Kimwkdal, J-one, SeoFaper
+made by Kimwkdal, J-one, SeoFaper, one-star
 ```
